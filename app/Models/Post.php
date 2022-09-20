@@ -2,78 +2,40 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\File;
-use Spatie\YamlFrontMatter\YamlFrontMatter;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use PhpParser\Node\Stmt\Function_;
 
-/**
- * 
- */
-class Post
+class Post extends Model
 {
+    use HasFactory;
 
-	public $title;
+    protected $with =['category', 'author'];
 
-	public $excerpt;
+    protected $guarded = [];
 
-	public $date;
+    // protected $fillable = ['title','excerpt','body'];
 
-	public $body;
+    public function scopeFilter($query, array $filters)
+    {
+        
+        $query->when($filters['search'] ?? false, function($query,$search){
 
-	public $slug;
+            $query
+            ->where('title', 'like','%'. $search.'%')
+            ->orWhere('body', 'like', '%'. $search.'%');
 
-	public function __construct($title, $excerpt, $date, $body, $slug)
-	{
-		$this-> title = $title;
-		$this-> excerpt = $excerpt;
-		$this-> date = $date;
-		$this-> body = $body;
-		$this-> slug = $slug;
-	}
+        });
+        
+    }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
+    public function author(){
 
-	public static function all()
-	{
-		$files= File::files(resource_path("posts"));
-
-		$posts = collect($files)
-		->map(function($file){
-
-			$document = YamlFrontMatter::parseFile($file);
-
-			return new Post (
-
-			$document-> title,
-			$document-> excerpt,
-			$document-> date,
-			$document-> body(),
-			$document-> slug
-
-		);
-
-
-		}
-		);
-		return $posts;}
-
-	public static function find ($slug)
-	{
-
-		return static::all()->firstWhere('slug', $slug);
-	}
-
-
-	
-	public static function findOrFail ($slug)
-	{
-		$post = static::find($slug);
-
-		if(! $post){
-
-			throw new ModelNotFoundException(); 
-		}
-
-		return $post;
-	}
+        return $this->belongsTo(User::class,'user_id');
+    }
 }
