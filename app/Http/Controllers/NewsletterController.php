@@ -14,7 +14,7 @@ class NewsletterController extends Controller
 
         try
         {
-            $newsletter = new Newsletter();
+            // $newsletter = new Newsletter();
             $newsletter->subscribe(request('email'));
         }
         catch(\Exception $e)

@@ -14,6 +14,7 @@ use App\Http\Controllers\PostCommentsController;
 use App\services\Newsletter;
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\AdminPostController;
 
 
 Route::get('/',[PostController::class,'index'], )->name('home');
@@ -33,29 +34,13 @@ Route::post('login',[SessionsController::class,'store'])->middleware('guest');
 Route::post('logout',[SessionsController::class,'destroy'])->middleware('auth');
 
 
+Route::middleware('can:admin')->group(function(){
 
+Route::POST('admin/posts',[AdminPostController::class,'store']);
+Route::get('admin/posts/create',[AdminPostController::class,'create']);
+Route::get('admin/posts',[AdminPostController::class,'index']);
 
-
-
-
-
-
-// Route::get('authors/{author:username}', function(User $author)
-// 	{
-// 		return view ('posts.index', 
-// 		['posts'=> $author->posts]
-// 	);
-// 	}
-// );
-
-// Route::get('categories/{category:slug}', function(Category $category)
-// 	{
-// 		return view ('posts', 
-// 		['posts'=> $category->posts,
-// 		'currentCategory'=>$category,
-// 		'categories'=>Category::all()]
-// 	);
-// 	})->name('category');
-
-
-
+Route::get('admin/posts/{post}/edit',[AdminPostController::class,'edit']);
+Route::patch('admin/posts/{post}',[AdminPostController::class,'update']);
+Route::delete('admin/posts/{post}',[AdminPostController::class,'destroy']);
+});
